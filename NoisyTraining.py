@@ -110,8 +110,7 @@ def experiment(epsilon=1.0, save_png=False, noisy_dense_size=256):
 
     for i in range(NUM_ATTACK_SAMPLES):
         z_i = z[i].astype(np.float64)
-        b_i = bias_np[i].astype(np.float64)
-        b_eq = z_i - b_i
+        b_eq = z_i - bias_np
         report = scipy.optimize.linprog(c, A_ub = None, b_ub = None, A_eq = A_eq, b_eq = b_eq, bounds=bounds, method = "interior-point")
         mse = ((x[i] - report['x']) ** 2).mean()
         mses.append(float(mse))
