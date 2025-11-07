@@ -6,7 +6,6 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         gfortran \
-        libatlas-base-dev \
         libopenblas-dev \
         liblapack-dev \
         libgl1 \
