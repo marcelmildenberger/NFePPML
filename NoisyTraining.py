@@ -140,7 +140,7 @@ def experiment(epsilon=1.0, save_png=False, noisy_dense_size=256):
 
 def start_experiments():
     for noisy_dense_size in [64, 128, 256, 512, 1024, 2048, 4096]:
-        for epsilon in range(0, 1001, 1):
+        for epsilon in range(1, 1001, 1):
             print(f"Starting experiment with epsilon={epsilon}, noisy_dense_size={noisy_dense_size}")
             experiment(epsilon=epsilon, save_png=False, noisy_dense_size=noisy_dense_size)
         experiment(epsilon=None, save_png=True,noisy_dense_size=noisy_dense_size)
