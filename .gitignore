@@ -1,1 +1,3 @@
 venv
+experiment_results/*
+!experiment_results/ignore_me
