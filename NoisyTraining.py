@@ -37,7 +37,7 @@ def _save_png(image_array, output_path):
     tf.io.write_file(output_path, png_bytes)
 
 
-def experiment(epsilon=1.0, save_png=False):
+def experiment(epsilon=1.0, save_png=False, noisy_dense_size=256):
     start_time = time.time()
     # load dataset
     (x_train, y_train),(x_test, y_test) = mnist.load_data()
@@ -70,7 +70,7 @@ def experiment(epsilon=1.0, save_png=False):
     # model is a 3-layer MLP with ReLU and dropout after each layer
     model = Sequential()
     model.add(Input(shape=(input_size,)))
-    model.add(NoisyDense(units=hidden_units, epsilon=epsilon, delta=1e-5, clip_norm=1.0, spectral_norm_cap=1.0, name="noisy_dense"))
+    model.add(NoisyDense(units=noisy_dense_size, epsilon=epsilon, delta=1e-5, clip_norm=1.0, spectral_norm_cap=1.0, name="noisy_dense"))
     model.add(Activation('relu'))
     model.add(Dropout(dropout))
     model.add(Dense(hidden_units))
@@ -132,17 +132,18 @@ def experiment(epsilon=1.0, save_png=False):
         "num_attack_samples": NUM_ATTACK_SAMPLES,
         "average_mse_reconstruction": float(np.mean(mses)),
         "mse_reconstructions": mses,
+        "noisy_dense_size": noisy_dense_size,
     }
     metrics_path = os.path.join(run_dir, "metrics.json")
     with open(metrics_path, "w") as metrics_file:
         json.dump(metrics, metrics_file, indent=2)
-    print(f"Saved experiment results to {run_dir}")
 
 def start_experiments():
-    for epsilon in range(0, 1501):
-        print(f"Running experiment with epsilon={epsilon}")
-        experiment(epsilon=epsilon, save_png=False)
-    experiment(epsilon=None, save_png=True)
+    for noisy_dense_size in [64, 128, 256, 512, 1024, 2048, 4096]:
+        for epsilon in range(0, 1001, 1):
+            print(f"Starting experiment with epsilon={epsilon}, noisy_dense_size={noisy_dense_size}")
+            experiment(epsilon=epsilon, save_png=False, noisy_dense_size=noisy_dense_size)
+        experiment(epsilon=None, save_png=True,noisy_dense_size=noisy_dense_size)
 
 if __name__ == "__main__":
     start_experiments()
