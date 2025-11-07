@@ -22,7 +22,10 @@ NUM_IMAGES_TO_SAVE = 10
 
 
 def _prepare_run_directory(epsilon):
-    epsilon_str = format(epsilon, "g")
+    if epsilon is not None:
+        epsilon_str = format(epsilon, "g")
+    else:
+        epsilon_str = "None"
     run_dir = os.path.join(RESULTS_DIR, f"experiment_epsilon_{epsilon_str}")
     os.makedirs(run_dir, exist_ok=True)
     return run_dir
@@ -34,7 +37,7 @@ def _save_png(image_array, output_path):
     tf.io.write_file(output_path, png_bytes)
 
 
-def experiment(epsilon=1.0):
+def experiment(epsilon=1.0, save_png=False):
     start_time = time.time()
     # load dataset
     (x_train, y_train),(x_test, y_test) = mnist.load_data()
@@ -112,17 +115,17 @@ def experiment(epsilon=1.0):
         report = scipy.optimize.linprog(c, A_ub = None, b_ub = None, A_eq = A_eq, b_eq = b_eq, bounds=bounds, method = "interior-point")
         mse = ((x[i] - report['x']) ** 2).mean()
         mses.append(float(mse))
-        img = report['x'].reshape(28, 28) * 255.0
-        img_uint8 = img.astype(np.uint8)
-        if len(saved_image_paths) < NUM_IMAGES_TO_SAVE:
+        if save_png and len(saved_image_paths) < NUM_IMAGES_TO_SAVE:    
+            img = report['x'].reshape(28, 28) * 255.0
+            img_uint8 = img.astype(np.uint8)
             image_name = f"reconstruction_{len(saved_image_paths) + 1}.png"
             image_path = os.path.join(image_dir, image_name)
             _save_png(img_uint8, image_path)
             saved_image_paths.append(image_name)
-
+            
     runtime_seconds = time.time() - start_time
     metrics = {
-        "epsilon": float(epsilon),
+        "epsilon": float(epsilon) if epsilon is not None else -1,
         "accuracy": float(acc),
         "loss": float(loss),
         "runtime_seconds": runtime_seconds,
@@ -136,9 +139,10 @@ def experiment(epsilon=1.0):
     print(f"Saved experiment results to {run_dir}")
 
 def start_experiments():
-    for epsilon in [1000, 0.1, 0.2, 0.4, 0.8, 1.6, 3.2, 6.4, 12.8, 25.6, 51.2, 102.4, 204.8, 409.6 , 819.2, 1638.4, None]:
+    for epsilon in range(0, 1501):
         print(f"Running experiment with epsilon={epsilon}")
-        experiment(epsilon=epsilon)
+        experiment(epsilon=epsilon, save_png=False)
+    experiment(epsilon=None, save_png=True)
 
 if __name__ == "__main__":
     start_experiments()

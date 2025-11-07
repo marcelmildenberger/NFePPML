@@ -1,3 +1,4 @@
 venv
 experiment_results/*
 !experiment_results/ignore_me
+aggregated_metrics.csv
