@@ -21,12 +21,12 @@ NUM_ATTACK_SAMPLES = 100
 NUM_IMAGES_TO_SAVE = 10
 
 
-def _prepare_run_directory(epsilon):
+def _prepare_run_directory(epsilon, noisy_dense_size):
     if epsilon is not None:
         epsilon_str = format(epsilon, "g")
     else:
         epsilon_str = "None"
-    run_dir = os.path.join(RESULTS_DIR, f"experiment_epsilon_{epsilon_str}")
+    run_dir = os.path.join(RESULTS_DIR, f"experiment_epsilon_{epsilon_str}_{noisy_dense_size}")
     os.makedirs(run_dir, exist_ok=True)
     return run_dir
 
@@ -90,7 +90,7 @@ def experiment(epsilon=1.0, save_png=False, noisy_dense_size=256):
 
     loss, acc = model.evaluate(x_test, y_test, batch_size=batch_size)
 
-    run_dir = _prepare_run_directory(epsilon)
+    run_dir = _prepare_run_directory(epsilon, noisy_dense_size)
     mses = []
     saved_image_paths = []
 
@@ -139,7 +139,14 @@ def experiment(epsilon=1.0, save_png=False, noisy_dense_size=256):
 
 def start_experiments():
     for noisy_dense_size in [64, 128, 256, 512, 1024, 2048, 4096]:
-        for epsilon in range(1, 1001, 1):
+        for epsilon in range(1, 50, 1):
+            print(f"Starting experiment with epsilon={epsilon}, noisy_dense_size={noisy_dense_size}")
+            experiment(epsilon=epsilon, save_png=False, noisy_dense_size=noisy_dense_size)
+        for epsilon in range(51, 501, 50):
+            print(f"Starting experiment with epsilon={epsilon}, noisy_dense_size={noisy_dense_size}")
+            experiment(epsilon=epsilon, save_png=False, noisy_dense_size=noisy_dense_size)
+        experiment(epsilon=None, save_png=True,noisy_dense_size=noisy_dense_size)
+        for epsilon in range(502, 1002, 100):
             print(f"Starting experiment with epsilon={epsilon}, noisy_dense_size={noisy_dense_size}")
             experiment(epsilon=epsilon, save_png=False, noisy_dense_size=noisy_dense_size)
         experiment(epsilon=None, save_png=True,noisy_dense_size=noisy_dense_size)
