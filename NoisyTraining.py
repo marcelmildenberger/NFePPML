@@ -145,7 +145,6 @@ def start_experiments():
         for epsilon in range(51, 501, 50):
             print(f"Starting experiment with epsilon={epsilon}, noisy_dense_size={noisy_dense_size}")
             experiment(epsilon=epsilon, save_png=False, noisy_dense_size=noisy_dense_size)
-        experiment(epsilon=None, save_png=True,noisy_dense_size=noisy_dense_size)
         for epsilon in range(502, 1002, 100):
             print(f"Starting experiment with epsilon={epsilon}, noisy_dense_size={noisy_dense_size}")
             experiment(epsilon=epsilon, save_png=False, noisy_dense_size=noisy_dense_size)
