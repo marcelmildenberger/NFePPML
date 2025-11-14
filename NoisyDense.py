@@ -4,10 +4,8 @@ class SpectralNormCap(tf.keras.constraints.Constraint):
     def __init__(self, cap):
         self.cap = cap
     def __call__(self, w):
-        # Compute top singular value and rescale if needed
         s = tf.linalg.svd(w, compute_uv=False)
         s_max = s[0]
-        # Avoid division by zero; if s_max <= cap, return w
         scale = tf.where(s_max > 0, self.cap / tf.maximum(s_max, self.cap), tf.constant(1.0, dtype=w.dtype))
         return w * scale
     def get_config(self):
@@ -15,23 +13,6 @@ class SpectralNormCap(tf.keras.constraints.Constraint):
     
 class NoisyDense(tf.keras.layers.Dense):
     def __init__(self, units, epsilon=None, delta=None, clip_norm=1.0, spectral_norm_cap=1.0, **kwargs):
-        """
-        Adds Gaussian noise to the pre-activation (W x) before bias is added.
-
-        One mode (DP-calibrated, preferred): set (epsilon, delta) and provide clip_norm and spectral_norm_cap.
-
-        Noise stddev is computed as:
-               std = S_f * sqrt(2 * log(1.25/delta)) / epsilon
-           where S_f = spectral_norm_cap * clip_norm.
-
-        Args:
-            units: Dense units.
-            epsilon: DP epsilon for Gaussian mechanism.
-            delta: DP delta for Gaussian mechanism.
-            clip_norm: L2 bound applied to inputs x to bound sensitivity.
-            spectral_norm_cap: Fixed bound B on the spectral norm of the kernel, enforced via kernel constraint.
-            **kwargs: Passed to tf.keras.layers.Dense.
-        """
         self.epsilon = epsilon
         self.delta = delta
         self.clip_norm = clip_norm
